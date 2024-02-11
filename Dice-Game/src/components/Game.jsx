@@ -1,4 +1,6 @@
 import React from "react";
+import Scores from "./Scores";
+import GuessButtons from "./GuessButtons";
 import "../App.css";
 
 class Game extends React.Component{
@@ -8,6 +10,7 @@ class Game extends React.Component{
             points: 0,
             score: 0,
             selected: 0,
+            autoRollActive: false,
             ruleView: false,
             lossActivate: false
         }
@@ -16,6 +19,8 @@ class Game extends React.Component{
         this.handleSelect = this.handleSelect.bind(this);
         this.reset = this.reset.bind(this);
         this.retryGame = this.retryGame.bind(this);
+        this.autoroll = this.autoroll.bind(this);
+        this.diceRoll = null;
     }
 
     showRules(){
@@ -51,6 +56,7 @@ class Game extends React.Component{
             if(dice == this.state.selected){
                 this.setState(state => ({
                         points : state.points + dice,
+                        lossActivate: true
                     }), 
                     () => {
                         if(this.state.score < this.state.points){
@@ -65,7 +71,6 @@ class Game extends React.Component{
                 if(this.state.points - 1 > 0){
                     this.setState(state => ({
                         points : state.points - 1,
-                        lossActivate: true
                     }));
                 } else {
                     this.setState({
@@ -73,10 +78,38 @@ class Game extends React.Component{
                     });
                     if(this.state.lossActivate){
                         document.getElementById("loss").style.display = "block";
+                        this.setState({
+                            autoRollActive: false
+                        });
+                        document.getElementById("autoRoll").style.background = "white";
+                        document.getElementById("autoRoll").style.color = "black";
+                        document.getElementById("autoRoll").textContent = "Auto Roll";
+                        clearInterval(this.diceRoll);
                     }
                 }
             }
         }
+    }
+
+    autoroll(){
+        let diceRoll;
+        var button = document.getElementById("autoRoll");
+        this.setState( state => ({
+            autoRollActive: !state.autoRollActive
+        }),
+        () => {
+            button.style.background = (this.state.autoRollActive ? "black" : "white");
+            button.style.color = (!this.state.autoRollActive ? "black" : "white");
+            button.textContent = (this.state.autoRollActive ? "Stop Auto Roll" : "Auto Roll");
+            if(this.state.autoRollActive){
+                this.diceRoll = setInterval(() => {
+                    this.generateDice();
+                }, 1000);
+            } else{
+                clearInterval(this.diceRoll);
+            }
+        }
+        );
     }
 
     handleSelect = (select) => {
@@ -102,7 +135,8 @@ class Game extends React.Component{
     reset(){
         this.setState({
             points: 0,
-            score : 0
+            score : 0,
+            lossActivate: false
         })
     }
 
@@ -115,6 +149,7 @@ class Game extends React.Component{
             points: 0,
             selected: 0,
             score: 0,
+            autoRollActive: false,
             lossActivate: false
         });
     }
@@ -123,28 +158,8 @@ class Game extends React.Component{
         return(
             <div>
                 <header className="gameHeader">
-                    <div className="scorePart">
-                        <div className="scores">
-                            <h1>{this.state.points}</h1>
-                            <p>Current Points</p>
-                        </div>
-                        <div className="scores">
-                            <h1>{this.state.score}</h1>
-                            <p>Score</p>
-                        </div>
-                    </div>
-                    <div className="guessButtons">
-                        <p id = "notSelected">You have not selected any number</p>
-                        <div className="buttons">
-                            <button id = "dice1" onClick = {() => this.handleSelect(1)}>1</button>
-                            <button id = "dice2" onClick = {() => this.handleSelect(2)}>2</button>
-                            <button id = "dice3" onClick = {() => this.handleSelect(3)}>3</button>
-                            <button id = "dice4" onClick = {() => this.handleSelect(4)}>4</button>
-                            <button id = "dice5" onClick = {() => this.handleSelect(5)}>5</button>
-                            <button id = "dice6" onClick = {() => this.handleSelect(6)}>6</button>
-                        </div>
-                        <p>Select Number</p>
-                    </div>
+                    <Scores points = {this.state.points} score = {this.state.score} />
+                    <GuessButtons handleSelect = {this.handleSelect} />
                 </header>
 
                 <div class = "mainGame">
@@ -152,6 +167,7 @@ class Game extends React.Component{
                         <img id = "diceButton" src = "/images/dice_1.png" onClick={this.generateDice}></img>
                         <figcaption>Click on Dice to roll</figcaption>
                     </figure>
+                    <button id = "autoRoll" onClick={this.autoroll}>Auto Roll</button><br></br>
                     <button onClick={this.reset}>Reset Score</button><br></br>
                     <button id = "rulesButton" onClick = {this.showRules}>Show Rules</button>
                 </div>

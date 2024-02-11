@@ -127,7 +127,7 @@ main{
   width: 250px;
   height: 449px;
   margin: auto;
-  margin-bottom: 50px;
+  margin-bottom: 90px;
 }
 
 .mainGame figure{
@@ -156,14 +156,10 @@ figure figcaption{
   background-color: white;
   cursor: pointer;
   border-radius: 5px;
+  margin-bottom: 10px;
 }
 
-.mainGame button:active{
-  background-color: black;
-  color: white;
-}
-
-.mainGame button:first-of-type{
+.mainGame button{
   margin-bottom: 10px;
 }
 
