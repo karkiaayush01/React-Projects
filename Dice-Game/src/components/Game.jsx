@@ -5,6 +5,7 @@ class Game extends React.Component{
     constructor(props){
         super(props);
         this.state = {
+            points: 0,
             score: 0,
             selected: 0,
             ruleView: false,
@@ -49,18 +50,27 @@ class Game extends React.Component{
             }, 100);
             if(dice == this.state.selected){
                 this.setState(state => ({
-                    score : state.score + dice
-                }));
-            }else{
-                if(this.state.score - 1 > 0){
+                        points : state.points + dice,
+                    }), 
+                    () => {
+                        if(this.state.score < this.state.points){
+                            this.setState(state => ({ 
+                                score: state.points,
+                            }));
+                        }
+                    }
+                );
+            }
+            else{
+                if(this.state.points - 1 > 0){
                     this.setState(state => ({
-                        score : state.score - 1,
+                        points : state.points - 1,
                         lossActivate: true
-                    }))
+                    }));
                 } else {
                     this.setState({
-                        score: 0
-                    })
+                        points: 0
+                    });
                     if(this.state.lossActivate){
                         document.getElementById("loss").style.display = "block";
                     }
@@ -91,6 +101,7 @@ class Game extends React.Component{
 
     reset(){
         this.setState({
+            points: 0,
             score : 0
         })
     }
@@ -101,10 +112,11 @@ class Game extends React.Component{
         document.getElementById(dice).style.background = "white";
         document.getElementById(dice).style.color = "black";
         this.setState({
+            points: 0,
             selected: 0,
             score: 0,
             lossActivate: false
-        })
+        });
     }
 
     render(){
@@ -112,8 +124,14 @@ class Game extends React.Component{
             <div>
                 <header className="gameHeader">
                     <div className="scorePart">
-                        <h1>{this.state.score}</h1>
-                        <p>Total Score</p>
+                        <div className="scores">
+                            <h1>{this.state.points}</h1>
+                            <p>Current Points</p>
+                        </div>
+                        <div className="scores">
+                            <h1>{this.state.score}</h1>
+                            <p>Score</p>
+                        </div>
                     </div>
                     <div className="guessButtons">
                         <p id = "notSelected">You have not selected any number</p>
