@@ -1,27 +1,63 @@
 import React from "react";
 import Content from "./components/Content.jsx";
 import Game from "./components/Game.jsx";
+import { connect, Provider } from "react-redux";
+import { createStore } from "redux";
 
-class App extends React.Component{
-  constructor(props){
-    super(props);
-    this.state = {
-      hasGameStarted : false
-    };
-    this.toggleDisplay = this.toggleDisplay.bind(this);
-  }
+const TOGGLE = 'TOGGLE';
 
-  toggleDisplay(){
-    this.setState(state => ({
-      hasGameStarted : !(state.hasGameStarted)
-    }))
-  }
+const toggle = () => ({
+  type: TOGGLE
+});
 
-  render(){
-    return(
-      this.state.hasGameStarted? <Game /> : <Content toggle = {this.toggleDisplay}/>
-    );
+const displayReducer = (state = false, action) => {
+  switch(action.type){
+    case TOGGLE:
+      return !state;
+    default:
+      return state;
   }
 };
 
-export default App
+const store = createStore(displayReducer);
+
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.toggleDisplay = this.toggleDisplay.bind(this);
+  }
+
+  toggleDisplay() {
+    this.props.toggleView();
+  }
+
+  render() {
+    return (
+      this.props.hasGameStarted ? <Game /> : <Content toggle={this.toggleDisplay}/>
+    );
+  }
+}
+
+const mapStateToProps = (state) => ({
+  hasGameStarted: state
+});
+
+const mapDispatchToProps = (dispatch) => ({
+  toggleView: () => {
+    dispatch(toggle());
+  }
+});
+
+const ConnectedApp = connect(mapStateToProps, mapDispatchToProps)(App);
+
+class AppWrapper extends React.Component {
+  render() {
+    return (
+      <Provider store={store}>
+        <ConnectedApp />
+      </Provider>
+    );
+  }
+}
+
+export default AppWrapper;
